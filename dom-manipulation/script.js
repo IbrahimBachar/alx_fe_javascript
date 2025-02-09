@@ -76,13 +76,37 @@ function addQuote() {
   const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
 
   if (newQuoteText && newQuoteCategory) {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
-    saveQuotes(); // Save quotes to local storage
+    const newQuote = { text: newQuoteText, category: newQuoteCategory };
+    quotes.push(newQuote);
+    saveQuotes();
     document.getElementById('addQuoteForm').reset();
     populateCategories();
     filterQuotes();
+    sendQuoteToServer(newQuote);
   } else {
     alert("Please fill in both the quote and category fields.");
+  }
+}
+
+// Function to send a new quote to the server
+async function sendQuoteToServer(quote) {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(quote)
+    });
+
+    if (response.ok) {
+      showNotification('Quote successfully sent to the server.');
+    } else {
+      throw new Error('Failed to send quote to the server.');
+    }
+  } catch (error) {
+    console.error('Error sending quote to the server:', error);
+    showNotification('Failed to send quote to the server.', true);
   }
 }
 
@@ -129,7 +153,7 @@ function restoreLastFilter() {
   const lastSelectedFilter = localStorage.getItem('lastSelectedFilter');
   if (lastSelectedFilter) {
     document.getElementById('categoryFilter').value = lastSelectedFilter;
-    filterQuotes(); // Apply the filter
+    filterQuotes();
   }
 }
 
