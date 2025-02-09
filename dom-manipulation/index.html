@@ -23,21 +23,36 @@
       background-color: #bfe7c1;
       border-radius: 10px;
     }
+    #notification {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #e0f7fa;
+      border: 1px solid #00bcd4;
+      display: none;
+    }
   </style>
   </head>
   <body>
     <h1>Dynamic Quote Generator</h1>
-    <div id="quoteDisplay"></div>
+    <div id="notification"></div>
+    <div id="quoteDisplay">Click "Show New Quote" to see a random quote!</div>
     <button id="newQuote">Show New Quote</button>
+  
     <h2>Filter Quotes by Category</h2>
     <select id="categoryFilter" onchange="filterQuotes()">
       <option value="all">All Categories</option>
       <!-- Dynamically populated categories -->
     </select>
-    <div id="addQuoteFormContainer"></div>
+  
+    <div id="addQuoteFormContainer"></div> <!-- Container for the dynamic form -->
+  
     <h2>Import/Export Quotes</h2>
     <button id="exportQuotes">Export Quotes as JSON</button>
     <input type="file" id="importFile" accept=".json" />
+  
+    <h2>Conflict Resolution</h2>
+    <button id="resolveConflict" style="display: none;">Resolve Conflict</button>
+  
     <script src="script.js"></script>
   </body>
   </html>
