@@ -77,7 +77,7 @@ function addQuote() {
 
   if (newQuoteText && newQuoteCategory) {
     quotes.push({ text: newQuoteText, category: newQuoteCategory });
-    saveQuotes();
+    saveQuotes(); // Save quotes to local storage
     document.getElementById('addQuoteForm').reset();
     populateCategories();
     filterQuotes();
@@ -129,7 +129,7 @@ function restoreLastFilter() {
   const lastSelectedFilter = localStorage.getItem('lastSelectedFilter');
   if (lastSelectedFilter) {
     document.getElementById('categoryFilter').value = lastSelectedFilter;
-    filterQuotes();
+    filterQuotes(); // Apply the filter
   }
 }
 
@@ -163,6 +163,51 @@ function importFromJsonFile(event) {
   fileReader.readAsText(file);
 }
 
+// Function to simulate fetching quotes from the server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const serverQuotes = await response.json();
+
+    // Transform server data into our quote format
+    const transformedQuotes = serverQuotes.map(post => ({
+      text: post.title,
+      category: 'Server'
+    }));
+
+    // Merge server quotes with local quotes
+    const mergedQuotes = [...quotes, ...transformedQuotes];
+    const uniqueQuotes = Array.from(new Set(mergedQuotes.map(quote => quote.text)))
+      .map(text => mergedQuotes.find(quote => quote.text === text));
+
+    // Update local quotes and save to storage
+    quotes = uniqueQuotes;
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+
+    // Notify the user
+    showNotification('Quotes updated from the server.');
+  } catch (error) {
+    console.error('Failed to fetch quotes from the server:', error);
+    showNotification('Failed to fetch quotes from the server.', true);
+  }
+}
+
+// Function to show notifications
+function showNotification(message, isError = false) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.style.backgroundColor = isError ? '#ffebee' : '#e0f7fa';
+  notification.style.borderColor = isError ? '#ff1744' : '#00bcd4';
+  notification.style.display = 'block';
+
+  // Hide the notification after 5 seconds
+  setTimeout(() => {
+    notification.style.display = 'none';
+  }, 5000);
+}
+
 // Event listeners
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
@@ -172,3 +217,6 @@ document.getElementById('importFile').addEventListener('change', importFromJsonF
 loadQuotes();
 createAddQuoteForm();
 showRandomQuote();
+
+// Periodically fetch quotes from the server (every 30 seconds)
+setInterval(fetchQuotesFromServer, 30000);
