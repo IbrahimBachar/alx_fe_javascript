@@ -76,20 +76,44 @@ function addQuote() {
   const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
 
   if (newQuoteText && newQuoteCategory) {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
+    const newQuote = { text: newQuoteText, category: newQuoteCategory };
+    quotes.push(newQuote);
     saveQuotes();
     document.getElementById('addQuoteForm').reset();
     populateCategories();
     filterQuotes();
+    sendQuoteToServer(newQuote);
   } else {
     alert("Please fill in both the quote and category fields.");
+  }
+}
+
+// Function to send a new quote to the server
+async function sendQuoteToServer(quote) {
+  try {
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(quote)
+    });
+
+    if (response.ok) {
+      showNotification('Quote successfully sent to the server.');
+    } else {
+      throw new Error('Failed to send quote to the server.');
+    }
+  } catch (error) {
+    console.error('Error sending quote to the server:', error);
+    showNotification('Failed to send quote to the server.', true);
   }
 }
 
 // Function to populate the categories dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById('categoryFilter');
-  const categories = [...new Set(quotes.map(quote => quote.category))];
+  const categories = [...new Set(quotes.map(quote => quote.category))]; // Extract unique categories
 
   // Clear existing options (except the first "All Categories" option)
   categoryFilter.innerHTML = '<option value="all">All Categories</option>';
@@ -210,9 +234,9 @@ function showNotification(message, isError = false) {
 
 // Function to sync quotes between local storage and the server
 async function syncQuotes() {
-  await fetchQuotesFromServer();
-  saveQuotes();
-}
+    await fetchQuotesFromServer();
+    saveQuotes();
+  }
 
 // Event listeners
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
@@ -224,5 +248,5 @@ loadQuotes();
 createAddQuoteForm();
 showRandomQuote();
 
-// Periodically sync quotes with the server (every 30 seconds)
+// Periodically fetch quotes from the server (every 30 seconds)
 setInterval(syncQuotes, 30000);
