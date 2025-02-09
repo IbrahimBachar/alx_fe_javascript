@@ -76,37 +76,13 @@ function addQuote() {
   const newQuoteCategory = document.getElementById('newQuoteCategory').value.trim();
 
   if (newQuoteText && newQuoteCategory) {
-    const newQuote = { text: newQuoteText, category: newQuoteCategory };
-    quotes.push(newQuote);
+    quotes.push({ text: newQuoteText, category: newQuoteCategory });
     saveQuotes();
     document.getElementById('addQuoteForm').reset();
     populateCategories();
     filterQuotes();
-    sendQuoteToServer(newQuote);
   } else {
     alert("Please fill in both the quote and category fields.");
-  }
-}
-
-// Function to send a new quote to the server
-async function sendQuoteToServer(quote) {
-  try {
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(quote)
-    });
-
-    if (response.ok) {
-      showNotification('Quote successfully sent to the server.');
-    } else {
-      throw new Error('Failed to send quote to the server.');
-    }
-  } catch (error) {
-    console.error('Error sending quote to the server:', error);
-    showNotification('Failed to send quote to the server.', true);
   }
 }
 
@@ -232,6 +208,12 @@ function showNotification(message, isError = false) {
   }, 5000);
 }
 
+// Function to sync quotes between local storage and the server
+async function syncQuotes() {
+  await fetchQuotesFromServer();
+  saveQuotes();
+}
+
 // Event listeners
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 document.getElementById('exportQuotes').addEventListener('click', exportQuotes);
@@ -242,5 +224,5 @@ loadQuotes();
 createAddQuoteForm();
 showRandomQuote();
 
-// Periodically fetch quotes from the server (every 30 seconds)
-setInterval(fetchQuotesFromServer, 30000);
+// Periodically sync quotes with the server (every 30 seconds)
+setInterval(syncQuotes, 30000);
